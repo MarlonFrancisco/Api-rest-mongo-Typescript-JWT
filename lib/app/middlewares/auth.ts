@@ -1,6 +1,5 @@
 import * as jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import configs from "../../configs";
 
 interface IRequestAuth extends Request {
     userId: string,
@@ -29,7 +28,9 @@ export default (req: IRequestAuth, res: Response, next: NextFunction) => {
     if (!/^Bearer$/.test(schema))
         return res.status(400).send({ err: "Token invalid!"});
     
-    jwt.verify(token, configs.hash, (err: object, decoded: IDecoded) => {
+    const { HASH } = process.env
+
+    jwt.verify(token, HASH, (err: object, decoded: IDecoded) => {
         if (err)
             return res.status(400).send({ err });
         
