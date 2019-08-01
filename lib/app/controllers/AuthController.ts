@@ -2,7 +2,6 @@ import * as express from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as crypto from 'crypto';
 import User from './../models/User';
-import configs from './../../configs';
 import mailer from "./../../mail";
 
 interface IParams {
@@ -12,6 +11,8 @@ interface IParams {
 export default class AuthController {
     private router: express.Router = express.Router();
 
+    private hash:string = process.env.HASH
+
     constructor() {
         this.register();
         this.auth();
@@ -19,7 +20,7 @@ export default class AuthController {
     }
 
     generateToken(params: IParams) {
-        return jwt.sign(params, configs.hash, {
+        return jwt.sign(params, this.hash, {
             expiresIn: 60000
         });
     }

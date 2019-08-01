@@ -1,9 +1,12 @@
 import * as mongoose from "mongoose";
 
-mongoose.connect("mongodb://localhost:27017/api", {
+const { DB_URL } = process.env
+
+mongoose.connect(DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true,
 });
+
 mongoose.promise = global.Promise;
 
 const db = mongoose.connection;

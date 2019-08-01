@@ -1,12 +1,14 @@
 import * as nodeMailer from "nodemailer";
 import * as hbs from "nodemailer-express-handlebars";
 
+const { HOST, PORT_MAIL, USER, PASS } = process.env;
+
 const transport = nodeMailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 2525,
+    host: HOST,
+    port: PORT_MAIL,
     auth: {
-        user: "f398ae4fa6a315",
-        pass: "2edaf6ff62f590",
+        user: USER,
+        pass: PASS,
     },
 });
 
