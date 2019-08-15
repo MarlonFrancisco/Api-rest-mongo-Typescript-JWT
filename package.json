@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./dist/index.js",
+    "start": "node ./dist/index.js",
     "watch": "gulp watch",
     "build": "gulp compile && gulp hbs"
   },
