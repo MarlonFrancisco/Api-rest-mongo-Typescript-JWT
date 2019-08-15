@@ -1,5 +1,4 @@
 import mongoose from "../../database";
-import { NextFunction } from "connect";
 import bcryptjs from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
