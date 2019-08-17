@@ -3,7 +3,7 @@ import mongoose from "./../../database";
 const lessonsSchema = new mongoose.Schema({
     matter: {
         type: String,
-        required: true
+        required: true,
     },
     title: {
         type: String,
@@ -17,7 +17,7 @@ const lessonsSchema = new mongoose.Schema({
         type: String,
         required: true,
         ref: "User",
-    }
+    },
 });
 
 const lesson = mongoose.model("Lesson", lessonsSchema);

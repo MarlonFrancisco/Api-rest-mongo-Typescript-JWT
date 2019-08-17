@@ -6,10 +6,6 @@ import UserController from "./app/controllers/UserController";
 import LessonController from "./app/controllers/LessonController";
 import * as cors from "cors";
 
-import * as dotenv from "dotenv";
-
-dotenv.config();
-
 const app = express();
 
 const authRouter = new AuthController();

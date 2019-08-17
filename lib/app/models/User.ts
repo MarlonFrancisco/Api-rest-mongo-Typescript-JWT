@@ -1,15 +1,14 @@
 import mongoose from "../../database";
-import bcryptjs from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     password: {
         type: String,
@@ -18,12 +17,12 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordToken: {
         type: String,
-        select: false
+        select: false,
     },
     resetValidToken: {
         type: Date,
-        select: false
-    }
+        select: false,
+    },
 });
 
 const user = mongoose.model("User", userSchema);

@@ -16,7 +16,7 @@ gulp.task('clean', () => {
 });
 
 gulp.task('hbs', () => {
-    return gulp.src("./lib/**/*.handlebars")
+    return gulp.src("./lib/**/*.html")
         .pipe(gulp.dest("dist"));
 });
 

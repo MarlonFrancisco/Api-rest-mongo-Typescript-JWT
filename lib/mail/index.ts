@@ -1,23 +1,84 @@
-import * as nodeMailer from "nodemailer";
-import * as hbs from "nodemailer-express-handlebars";
+import { createTransport } from "nodemailer";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-const transport = nodeMailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-        user: "f398ae4fa6a315",
-        pass: "2edaf6ff62f590",
-    },
-});
+type TypeMail = "forgotpassword" | "welcome";
 
-transport.use("compile", hbs({
-    viewEngine: {
-        extname: ".handlebars",
-        layoutsDir: "dist/mail/templates",
-        partialsDir: "dist/mail/templates",
-    },
-    viewPath: "dist/mail/templates",
-    extname: ".handlebars",
-}));
+export default class TransportMailer {
+    private from = "marlon@biggy.com.br";
+    private transport = createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+            user: this.from,
+            pass: "1qaz2wsx",
+        },
+    });
 
-export default transport;
+    /**
+     * Prepare mail for send
+     *
+     * @param {TypeMail} type
+     * @param {string} to
+     * @param {*} data
+     * @memberof TransportMailer
+     */
+    public prepareMail(type: TypeMail, to: string, tokens: any) {
+        const templatePath = join(__dirname, `/templates/${type}.html`);
+        let template = readFileSync(templatePath, "utf-8");
+
+        Object.entries(tokens).map((token) =>
+            template = template.replace(token[0], token[1].toString()));
+
+        return this.transportMail(template, this.defineSubject(type), to);
+    }
+
+    /**
+     * Define subject to mail according with type mail
+     *
+     * @param {string} type
+     * @returns {string}
+     * @memberof TransportMailer
+     */
+    private defineSubject(type: string): string {
+        let subject = "";
+
+        if (type === "forgotpassword") {
+            subject = "Recuração de senha";
+        } else if (type === "welcome") {
+            subject = "Welcome content creator";
+        }
+
+        return subject;
+    }
+
+    /**
+     * Send mail
+     *
+     * @private
+     * @param {string} template
+     * @param {string} subject
+     * @param {string} to
+     * @returns {Promise<any>}
+     * @memberof TransportMailer
+     */
+    private transportMail(template: string, subject: string, to: string): Promise<any> {
+        const options = {
+            from: this.from,
+            to,
+            subject,
+            html: template,
+        };
+
+        return new Promise((resolve, reject) => {
+            this.transport.sendMail(options, (err, info) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(info);
+                }
+            });
+        });
+    }
+}

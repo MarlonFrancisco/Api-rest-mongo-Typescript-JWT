@@ -1,96 +1,77 @@
-import * as express from "express";
-import * as jwt from "jsonwebtoken";
+import { Router, Request, Response } from "express";
 import * as crypto from "crypto";
 import User from "./../models/User";
-import configs from "./../../configs";
-import mailer from "./../../mail";
+import TransportMailer from "./../../mail";
+import generateToken from "./../utils/generateToken";
 
-interface IParams {
-    id: string;
-}
+import { Post, router } from "./../utils/decorators";
 
 export default class AuthController {
-    private router: express.Router = express.Router();
+    private router: Router = router;
 
-    constructor() {
-        this.register();
-        this.auth();
-        this.forgotPassword();
-    }
+    @Post("/register")
+    public async register(req: Request, res: Response) {
+        try {
+            const mail = new TransportMailer();
+            const user = await User.create({ ...req.body });
 
-    private generateToken(params: IParams) {
-        return jwt.sign(params, configs.hash, {
-            expiresIn: 60000,
-        });
-    }
-
-    private register() {
-        this.router.post("/register", async (req: express.Request, res: express.Response) => {
-            try {
-
-                const user = await User.create({ ...req.body });
-
-                if (!user) {
-                    return res.status(400).send({ err: "User not was created! " });
-                }
-
-                return res.status(200).send({ user, token: this.generateToken({ id: user.id }) });
-            } catch (err) {
-                return res.status(400).send({ err: "Error in register" });
+            if (!user) {
+                return res.status(400).send({ err: "User not was created! " });
             }
-        });
+
+            const status = await mail.prepareMail("welcome", user.email, {
+                "%%user%%": user.name,
+                "%%address%%": "https://managecontent-82d15.web.app/",
+            });
+
+            return res.status(200).send({ user, token: generateToken({ id: user.id }), status });
+        } catch (err) {
+            return res.status(400).send(err);
+        }
     }
 
-    private auth() {
-        this.router.post("/auth", async (req: express.Request, res: express.Response) => {
-            try {
-                const user = await User.findOne({ ...req.body }).select("+password");
+    @Post("/login")
+    public async auth(req: Request, res: Response) {
+        try {
+            const user = await User.findOne({ ...req.body }).select("+password");
 
-                if (!user) {
-                    return res.status(400).send({ err: "User not exists!" });
-                }
-                return res.status(200).send({ user, token: this.generateToken({ id: user.id }) });
-            } catch (err) {
-                return res.status(400).send({ err: "Error in authenticate" });
+            if (!user) {
+                return res.status(400).send({ err: "User not exists!" });
             }
-        });
+            return res.status(200).send({ user, token: generateToken({ id: user.id }) });
+        } catch (err) {
+            return res.status(400).send(err);
+        }
     }
 
-    private forgotPassword() {
-        this.router.post("/forgotPassword", async (req: express.Request, res: express.Response) => {
+    @Post("/recovery")
+    public async forgotPassword(req: Request, res: Response) {
             try {
+                const mail = new TransportMailer();
                 const user = await User.findOne({ ...req.body });
 
                 if (!user) {
                     return res.status(400).send({ info: "User not found! " });
                 }
 
-                const token = crypto.randomBytes(20).toString("hex");
-                const now = new Date().setHours(new Date().getHours() + 1);
+                const password = crypto.randomBytes(3).toString("hex");
 
                 await User.findByIdAndUpdate(user.id, {
                     $set: {
-                        resetPasswordToken: token,
-                        resetValidToken: now,
+                        password,
                     },
                 });
 
-                mailer.sendMail({
-                    from: user.mail,
-                    to: "marlin.hvga@gmail.com",
-                    template: "forgotPassword",
-                    context: { token, name: user.name },
-                }, (err: object) => {
-                    if (err) {
-                        return res.status(400).send({ err });
-                    }
-
-                    return res.status(200).send({ info: "OK!" });
+                const status = await mail.prepareMail("forgotpassword", user.email, {
+                    "%%user%%": user.name,
+                    "%%pass%%": `${user.name}${password}`,
+                    "%%address%%": "https://managecontent-82d15.web.app/",
                 });
+
+                res.send(status);
             } catch (err) {
-                res.status(400).send({ err: "Error in forgotPassword" });
+                res.status(400).send(err);
             }
-        });
     }
 
     get Router() {
