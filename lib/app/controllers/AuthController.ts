@@ -1,10 +1,10 @@
 import { Router, Request, Response } from "express";
-import * as crypto from "crypto";
+import { Post, router } from "./../utils/decorators";
 import User from "./../models/User";
 import TransportMailer from "./../../mail";
 import generateToken from "./../utils/generateToken";
-
-import { Post, router } from "./../utils/decorators";
+import "dotenv/config";
+import { verify } from "jsonwebtoken";
 
 export default class AuthController {
     private router: Router = router;
@@ -21,10 +21,12 @@ export default class AuthController {
 
             const status = await mail.prepareMail("welcome", user.email, {
                 "%%user%%": user.name,
-                "%%address%%": "https://managecontent-82d15.web.app/",
+                "%%address%%": process.env.BASE_URL,
             });
 
-            return res.status(200).send({ user, token: generateToken({ id: user.id }), status });
+            return res
+                .status(200)
+                .send({ user, token: generateToken({ id: user.id }), status });
         } catch (err) {
             return res.status(400).send(err);
         }
@@ -33,45 +35,76 @@ export default class AuthController {
     @Post("/login")
     public async auth(req: Request, res: Response) {
         try {
-            const user = await User.findOne({ ...req.body }).select("+password");
+            const user = await User.findOne({ ...req.body }).select(
+                "+password",
+            );
 
             if (!user) {
                 return res.status(400).send({ err: "User not exists!" });
             }
-            return res.status(200).send({ user, token: generateToken({ id: user.id }) });
+            return res
+                .status(200)
+                .send({ user, token: generateToken({ id: user.id }) });
+        } catch (err) {
+            return res.status(400).send(err);
+        }
+    }
+
+    @Post("/requestRecovery")
+    public async requestRecovery(req: Request, res: Response) {
+        try {
+            const mail = new TransportMailer();
+            const user = await User.findOne({ ...req.body });
+
+            if (!user) {
+                return res.status(400).send({ info: "User not found! " });
+            }
+
+            const token = generateToken({ id: user._id });
+
+            const status = await mail.prepareMail(
+                "forgotpassword",
+                user.email,
+                {
+                    "%%user%%": user.name,
+                    "%%address%%": `${process.env.BASE_URL}?token=${token}`,
+                },
+            );
+
+            return res.send(status);
         } catch (err) {
             return res.status(400).send(err);
         }
     }
 
     @Post("/recovery")
-    public async forgotPassword(req: Request, res: Response) {
-            try {
-                const mail = new TransportMailer();
-                const user = await User.findOne({ ...req.body });
+    public async recovery(req: Request, res: Response) {
+        try {
+            const { password } = req.body;
+            const { authorization } = req.headers;
 
-                if (!user) {
-                    return res.status(400).send({ info: "User not found! " });
-                }
+            verify(
+                authorization,
+                process.env.HASH,
+                async (err, decoded: { id: string }) => {
+                    if (err) {
+                        return res.status(400).send(err);
+                    }
 
-                const password = crypto.randomBytes(3).toString("hex");
+                    const { id } = decoded;
 
-                await User.findByIdAndUpdate(user.id, {
-                    $set: {
-                        password,
-                    },
-                });
+                    const user = await User.findOne({ id });
 
-                const status = await mail.prepareMail("forgotpassword", user.email, {
-                    "%%user%%": user.name,
-                    "%%pass%%": `${user.name}${password}`,
-                    "%%address%%": "https://managecontent-82d15.web.app/",
-                });
+                    user.password = password;
 
-                res.send(status);
-            } catch (err) {
-                res.status(400).send(err);
-            }
+                    await user.save();
+
+                    return res.status(200);
+                },
+            );
+        } catch (err) {
+            res.status(400).send(err);
+        }
     }
 
     get Router() {

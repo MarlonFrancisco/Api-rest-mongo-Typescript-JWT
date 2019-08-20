@@ -1,4 +1,11 @@
 import mongoose from "../../database";
+import { Document } from "mongoose";
+
+interface IUser extends Document {
+    name: string;
+    email: string;
+    password: string;
+}
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -15,16 +22,8 @@ const userSchema = new mongoose.Schema({
         required: true,
         select: false,
     },
-    resetPasswordToken: {
-        type: String,
-        select: false,
-    },
-    resetValidToken: {
-        type: Date,
-        select: false,
-    },
 });
 
-const user = mongoose.model("User", userSchema);
+const user = mongoose.model<IUser>("User", userSchema);
 
 export default user;

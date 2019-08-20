@@ -1,8 +1,8 @@
 import { sign } from "jsonwebtoken";
-import configs from "./../../configs";
+import "dotenv/config";
 
 export default function(params = {}) {
-    return sign(params, configs.hash, {
-        expiresIn: 600000,
+    return sign(params, process.env.HASH, {
+        expiresIn: 10000,
     });
 }

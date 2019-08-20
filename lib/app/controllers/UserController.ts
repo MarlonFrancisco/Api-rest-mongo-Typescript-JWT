@@ -1,15 +1,10 @@
 import { Request, Response, Router } from "express";
-import Auth from "./../middlewares/auth";
 import User from "./../models/User";
 
 import { Get, Put, Delete, router } from "./../utils/decorators";
 
 export default class UserController {
     private router: Router = router;
-
-    constructor() {
-        this.router.use(Auth);
-    }
 
     @Get("/")
     public async getAll(req: Request, res: Response) {
@@ -40,11 +35,15 @@ export default class UserController {
     @Put("/:id")
     public async update(req: Request, res: Response) {
         try {
-            const user = await User.findOneAndUpdate({ _id: req.params.id }, {
-                $set: {
-                    ...req.body,
+            const user = await User.findOneAndUpdate(
+                { _id: req.params.id },
+                {
+                    $set: {
+                        ...req.body,
+                    },
                 },
-            }, { new: true });
+                { new: true },
+            );
 
             return res.status(200).send(user);
         } catch (err) {
@@ -57,7 +56,9 @@ export default class UserController {
         try {
             await User.findByIdAndDelete(req.params.id);
 
-            res.status(200).send({ info: `User deleted with sucesss ${req.params.id}` });
+            res.status(200).send({
+                info: `User deleted with sucesss ${req.params.id}`,
+            });
         } catch (err) {
             return res.status(400).send(err);
         }

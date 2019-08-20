@@ -7,10 +7,6 @@ import { Get, Put, Delete, router } from "./../utils/decorators";
 export default class LessonController {
     private router: Router = router;
 
-    constructor() {
-        this.router.use(auth);
-    }
-
     @Get("/")
     public async getAll(req: Request, res: Response) {
         try {
@@ -25,7 +21,9 @@ export default class LessonController {
     @Get("/:id")
     public async getOne(req: Request, res: Response) {
         try {
-            const user = await Lessons.findOne({ id_: req.params.id }).populate("+User");
+            const user = await Lessons.findOne({ id_: req.params.id }).populate(
+                "+User",
+            );
 
             if (!user) {
                 return res.status(400).send({ error: "User not found" });
@@ -44,11 +42,15 @@ export default class LessonController {
                 return res.status(400).send({ error: "User not found" });
             }
 
-            const user = await Lessons.findOneAndUpdate({ _id: req.params.id }, {
-                $set: {
-                    ...req.body,
+            const user = await Lessons.findOneAndUpdate(
+                { _id: req.params.id },
+                {
+                    $set: {
+                        ...req.body,
+                    },
                 },
-            }, { new: true });
+                { new: true },
+            );
 
             return res.status(200).send(user);
         } catch (err) {
@@ -59,14 +61,15 @@ export default class LessonController {
     @Delete("/:id")
     public async delete(req: Request, res: Response) {
         try {
-
             if (!this.lessonExists(req.params.id)) {
                 return res.status(400).send({ error: "User not found" });
             }
 
             await Lessons.findByIdAndDelete(req.params.id);
 
-            res.status(200).send({ info: `Lesson deleted with sucesss ${req.params.id}` });
+            res.status(200).send({
+                info: `Lesson deleted with sucesss ${req.params.id}`,
+            });
         } catch (err) {
             return res.status(400).send(err);
         }

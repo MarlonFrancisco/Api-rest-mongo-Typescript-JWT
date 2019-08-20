@@ -1,18 +1,19 @@
 import { createTransport } from "nodemailer";
 import { readFileSync } from "fs";
 import { join } from "path";
+import "dotenv/config";
 
 type TypeMail = "forgotpassword" | "welcome";
 
 export default class TransportMailer {
-    private from = "marlon@biggy.com.br";
+    private from = process.env.FROM_EMAIL;
     private transport = createTransport({
         host: "smtp.gmail.com",
         port: 587,
         secure: false,
         auth: {
             user: this.from,
-            pass: "1qaz2wsx",
+            pass: process.env.FROM_PASS,
         },
     });
 
@@ -28,8 +29,10 @@ export default class TransportMailer {
         const templatePath = join(__dirname, `/templates/${type}.html`);
         let template = readFileSync(templatePath, "utf-8");
 
-        Object.entries(tokens).map((token) =>
-            template = template.replace(token[0], token[1].toString()));
+        Object.entries(tokens).map(
+            (token) =>
+                (template = template.replace(token[0], token[1].toString())),
+        );
 
         return this.transportMail(template, this.defineSubject(type), to);
     }
@@ -63,7 +66,11 @@ export default class TransportMailer {
      * @returns {Promise<any>}
      * @memberof TransportMailer
      */
-    private transportMail(template: string, subject: string, to: string): Promise<any> {
+    private transportMail(
+        template: string,
+        subject: string,
+        to: string,
+    ): Promise<any> {
         const options = {
             from: this.from,
             to,

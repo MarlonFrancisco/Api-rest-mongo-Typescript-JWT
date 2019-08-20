@@ -1,13 +1,10 @@
 import * as mongoose from "mongoose";
-import * as dotenv from "dotenv";
-
-dotenv.config();
+import "dotenv/config";
 
 mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true,
 });
-mongoose.promise = global.Promise;
 
 const db = mongoose.connection;
 
