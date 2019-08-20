@@ -17,7 +17,7 @@ const lessonRouter = new LessonController();
 app.use(urlencoded({ extended: true }));
 app.use(json());
 
-app.use("/auth", Auth);
+app.use("/lesson", Auth);
 app.use("/user", Auth);
 
 app.use(cors());
