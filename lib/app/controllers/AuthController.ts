@@ -12,8 +12,14 @@ export default class AuthController {
     @Post("/register")
     public async register(req: Request, res: Response) {
         try {
+            let user = await User.findOne({ ...req.body });
+
+            if (user) {
+                return res.status(400).send("User exists");
+            }
+
             const mail = new TransportMailer();
-            const user = await User.create({ ...req.body });
+            user = await User.create({ ...req.body });
 
             if (!user) {
                 return res.status(400).send({ err: "User not was created! " });
@@ -35,7 +41,8 @@ export default class AuthController {
     @Post("/login")
     public async auth(req: Request, res: Response) {
         try {
-            const user = await User.findOne({ ...req.body }).select(
+            const { email, password } = req.body;
+            const user = await User.findOne({ email, password }).select(
                 "+password",
             );
 
@@ -74,36 +81,6 @@ export default class AuthController {
             return res.send(status);
         } catch (err) {
             return res.status(400).send(err);
-        }
-    }
-
-    @Post("/recovery")
-    public async recovery(req: Request, res: Response) {
-        try {
-            const { password } = req.body;
-            const { authorization } = req.headers;
-
-            verify(
-                authorization,
-                process.env.HASH,
-                async (err, decoded: { id: string }) => {
-                    if (err) {
-                        return res.status(400).send(err);
-                    }
-
-                    const { id } = decoded;
-
-                    const user = await User.findOne({ id });
-
-                    user.password = password;
-
-                    await user.save();
-
-                    return res.status(200);
-                },
-            );
-        } catch (err) {
-            res.status(400).send(err);
         }
     }
 
