@@ -22,7 +22,7 @@ export default class AuthController {
             user = await User.create({ ...req.body });
 
             if (!user) {
-                return res.send(error("User not was created!"));
+                return res.status(400).send(error("User not was created!"));
             }
 
             const status = await mail.prepareMail("welcome", user.email, {
@@ -46,7 +46,7 @@ export default class AuthController {
             );
 
             if (!user) {
-                return res.send(error("User not exists!"));
+                return res.status(400).send(error("User not exists!"));
             }
             return res
                 .send(success({ user, token: `Bearer ${generateToken({ id: user.id })}` }));
@@ -62,7 +62,7 @@ export default class AuthController {
             const user = await User.findOne({ ...req.body });
 
             if (!user) {
-                return res.send(error("User not found! "));
+                return res.status(400).send(error("User not found! "));
             }
 
             const token = generateToken({ id: user._id });

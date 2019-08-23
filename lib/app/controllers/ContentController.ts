@@ -26,7 +26,7 @@ export default class ContentController {
             );
 
             if (!user) {
-                return res.send(error("User not found"));
+                return res.status(400).send(error("User not found"));
             }
 
             return res.send(success(user));
@@ -39,7 +39,7 @@ export default class ContentController {
     public async update(req: Request, res: Response) {
         try {
             if (!this.lessonExists(req.params.id)) {
-                return res.send(error("User not found"));
+                return res.status(400).send(error("User not found"));
             }
 
             const user = await Lessons.findOneAndUpdate(
@@ -62,7 +62,7 @@ export default class ContentController {
     public async delete(req: Request, res: Response) {
         try {
             if (!this.lessonExists(req.params.id)) {
-                return res.send(error("User not found"));
+                return res.status(400).send(error("User not found"));
             }
 
             await Lessons.findByIdAndDelete(req.params.id);

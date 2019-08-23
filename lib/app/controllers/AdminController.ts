@@ -66,7 +66,7 @@ export default class AdminController {
             const user = await User.findOne(req.body);
 
             if (!user) {
-                return res.send(error("User not found"));
+                return res.status(400).send(error("User not found"));
             }
 
             await User.findByIdAndDelete(req.params.id);
