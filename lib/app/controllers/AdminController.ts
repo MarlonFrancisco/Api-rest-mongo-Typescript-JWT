@@ -6,6 +6,9 @@ import { Get, Put, Delete, router } from "./../utils/decorators";
 
 interface IRequest extends Request {
     userId: string;
+    params: {
+        id: string;
+    };
 }
 
 export default class AdminController {
