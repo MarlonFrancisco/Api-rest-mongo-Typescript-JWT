@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import User from "./../models/User";
-
+import { success, error } from "jsend";
 import { Get, Put, Delete, router, Post } from "./../utils/decorators";
 
 interface IRequest extends Request {
@@ -21,9 +21,9 @@ export default class UserController {
 
             await user.save();
 
-            return res.status(200);
+            return res.send(success(user));
         } catch (err) {
-            res.status(400).send(err);
+            res.send(error(err));
         }
     }
 

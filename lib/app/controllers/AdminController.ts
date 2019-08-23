@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import User from "./../models/User";
+import { success, error } from "jsend";
 
 import { Get, Put, Delete, router } from "./../utils/decorators";
 
@@ -15,9 +16,9 @@ export default class AdminController {
         try {
             const users = await User.find();
 
-            return res.status(200).send(users);
+            return res.send(success(users));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
@@ -30,9 +31,9 @@ export default class AdminController {
                 return res.status(400).send({ error: "User not found" });
             }
 
-            return res.status(200).send(user);
+            return res.send(success(user));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
@@ -49,22 +50,26 @@ export default class AdminController {
                 { new: true },
             );
 
-            return res.status(200).send(user);
+            return res.send(success(user));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
     @Delete("/:id")
     public async delete(req: IRequest, res: Response) {
         try {
+            const user = await User.findOne(req.body);
+
+            if (!user) {
+                return res.send(error("User not found"));
+            }
+
             await User.findByIdAndDelete(req.params.id);
 
-            res.status(200).send({
-                info: `User deleted with sucesss ${req.params.id}`,
-            });
+            res.send(success(`User deleted with sucesss ${req.params.id}`));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 

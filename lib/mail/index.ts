@@ -48,9 +48,9 @@ export default class TransportMailer {
         let subject = "";
 
         if (type === "forgotpassword") {
-            subject = "Recuração de senha";
+            subject = "[CONSOLE] Recovery password";
         } else if (type === "welcome") {
-            subject = "Welcome content creator";
+            subject = "[CONSOLE] Welcome content creator";
         }
 
         return subject;

@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
-import auth from "./../middlewares/auth";
-import Lessons from "./../models/Lessons";
+import Lessons from "../models/Lessons";
+import { success, error } from "jsend";
 
-import { Get, Put, Delete, router } from "./../utils/decorators";
+import { Get, Put, Delete, router } from "../utils/decorators";
 
 export default class LessonController {
     private router: Router = router;
@@ -12,9 +12,9 @@ export default class LessonController {
         try {
             const users = await Lessons.find().populate("+User");
 
-            return res.status(200).send(users);
+            return res.send(success(users));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
@@ -26,12 +26,12 @@ export default class LessonController {
             );
 
             if (!user) {
-                return res.status(400).send({ error: "User not found" });
+                return res.send(error("User not found"));
             }
 
-            return res.status(200).send(user);
+            return res.send(success(user));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
@@ -39,7 +39,7 @@ export default class LessonController {
     public async update(req: Request, res: Response) {
         try {
             if (!this.lessonExists(req.params.id)) {
-                return res.status(400).send({ error: "User not found" });
+                return res.send(error("User not found"));
             }
 
             const user = await Lessons.findOneAndUpdate(
@@ -52,9 +52,9 @@ export default class LessonController {
                 { new: true },
             );
 
-            return res.status(200).send(user);
+            return res.send(success(user));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
@@ -62,16 +62,14 @@ export default class LessonController {
     public async delete(req: Request, res: Response) {
         try {
             if (!this.lessonExists(req.params.id)) {
-                return res.status(400).send({ error: "User not found" });
+                return res.send(error("User not found"));
             }
 
             await Lessons.findByIdAndDelete(req.params.id);
 
-            res.status(200).send({
-                info: `Lesson deleted with sucesss ${req.params.id}`,
-            });
+            res.send(success(req.params.id));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 

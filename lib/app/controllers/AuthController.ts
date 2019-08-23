@@ -4,7 +4,7 @@ import User from "./../models/User";
 import TransportMailer from "./../../mail";
 import generateToken from "./../utils/generateToken";
 import "dotenv/config";
-import { verify } from "jsonwebtoken";
+import { success, error } from "jsend";
 
 export default class AuthController {
     private router: Router = router;
@@ -15,14 +15,14 @@ export default class AuthController {
             let user = await User.findOne({ ...req.body });
 
             if (user) {
-                return res.status(400).send("User exists");
+                return res.send(error("User exists"));
             }
 
             const mail = new TransportMailer();
             user = await User.create({ ...req.body });
 
             if (!user) {
-                return res.status(400).send({ err: "User not was created! " });
+                return res.send(error("User not was created!"));
             }
 
             const status = await mail.prepareMail("welcome", user.email, {
@@ -31,10 +31,9 @@ export default class AuthController {
             });
 
             return res
-                .status(200)
-                .send({ user, token: generateToken({ id: user.id }), status });
+                .send(success({ user, token: `Bearer ${generateToken({ id: user.id })}`, status }));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
@@ -47,24 +46,23 @@ export default class AuthController {
             );
 
             if (!user) {
-                return res.status(400).send({ err: "User not exists!" });
+                return res.send(error("User not exists!"));
             }
             return res
-                .status(200)
-                .send({ user, token: generateToken({ id: user.id }) });
+                .send(success({ user, token: `Bearer ${generateToken({ id: user.id })}` }));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
-    @Post("/requestRecovery")
-    public async requestRecovery(req: Request, res: Response) {
+    @Post("/recovery")
+    public async recovery(req: Request, res: Response) {
         try {
             const mail = new TransportMailer();
             const user = await User.findOne({ ...req.body });
 
             if (!user) {
-                return res.status(400).send({ info: "User not found! " });
+                return res.send(error("User not found! "));
             }
 
             const token = generateToken({ id: user._id });
@@ -74,13 +72,13 @@ export default class AuthController {
                 user.email,
                 {
                     "%%user%%": user.name,
-                    "%%address%%": `${process.env.BASE_URL}?token=${token}`,
+                    "%%address%%": `${process.env.BASE_URL}?token=Bearer ${token}`,
                 },
             );
 
-            return res.send(status);
+            return res.send(success(status));
         } catch (err) {
-            return res.status(400).send(err);
+            return res.send(error(err));
         }
     }
 
