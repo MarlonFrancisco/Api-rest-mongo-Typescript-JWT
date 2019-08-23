@@ -5,6 +5,7 @@ import { Get, Put, Delete, router, Post } from "./../utils/decorators";
 
 interface IRequest extends Request {
     userId: string;
+    body: any;
 }
 
 export default class UserController {

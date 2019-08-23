@@ -9,6 +9,7 @@ interface IRequest extends Request {
     params: {
         id: string;
     };
+    body: any;
 }
 
 export default class AdminController {
