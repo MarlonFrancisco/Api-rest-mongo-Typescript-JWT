@@ -10,6 +10,17 @@ interface IRequest extends Request {
 export default class UserController {
     private router: Router = router;
 
+    @Get("/")
+    public async user(req: IRequest, res: Response) {
+        try {
+            const user = await User.findById(req.userId);
+
+            return res.send(success(user));
+        } catch (err) {
+            return res.send(error(err));
+        }
+    }
+
     @Post("/recovery")
     public async recovery(req: IRequest, res: Response) {
         try {

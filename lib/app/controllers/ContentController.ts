@@ -4,7 +4,7 @@ import { success, error } from "jsend";
 
 import { Get, Put, Delete, router } from "../utils/decorators";
 
-export default class LessonController {
+export default class ContentController {
     private router: Router = router;
 
     @Get("/")
