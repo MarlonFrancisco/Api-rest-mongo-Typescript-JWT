@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import User from "./../models/User";
-import { success, error } from "jsend";
 import Http from "../utils/decorators/Http";
 
 const http = new Http(Router());
@@ -28,9 +27,9 @@ class UserController {
                 return res.status(400).send({ error: "User not found" });
             }
 
-            return res.send(success(user));
+            return res.send(user);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 
@@ -45,9 +44,9 @@ class UserController {
 
             await user.save();
 
-            return res.send(success(user));
+            return res.send(user);
         } catch (err) {
-            res.status(400).send(error(err));
+            res.status(400).send(err);
         }
     }
 
@@ -64,9 +63,9 @@ class UserController {
                 { new: true },
             );
 
-            return res.send(success(user));
+            return res.send(user);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 
@@ -76,14 +75,14 @@ class UserController {
             const user = await User.findOne(req.body);
 
             if (!user) {
-                return res.status(400).send(error("User not found"));
+                return res.status(400).send("User not found");
             }
 
             await User.findByIdAndDelete(req.params.id);
 
-            res.send(success(`User deleted with sucesss ${req.params.id}`));
+            res.send(`User deleted with sucesss ${req.params.id}`);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 }
