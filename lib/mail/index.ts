@@ -25,13 +25,13 @@ export default class TransportMailer {
      * @param {*} data
      * @memberof TransportMailer
      */
-    public prepareMail(type: TypeMail, to: string, tokens: any) {
+    public prepareMail(type: TypeMail, to: string, pairs: any) {
         const templatePath = join(__dirname, `/templates/${type}.html`);
         let template = readFileSync(templatePath, "utf-8");
 
-        Object.entries(tokens).map(
-            (token) =>
-                (template = template.replace(token[0], token[1].toString())),
+        Object.entries(pairs).map(
+            (pair) =>
+                (template = template.replace(`%%${pair[0]}%%`, pair[1].toString())),
         );
 
         return this.transportMail(template, this.defineSubject(type), to);

@@ -1,15 +1,17 @@
 import { Router, Request, Response } from "express";
-import { Post, router } from "./../utils/decorators";
+import Http from "../utils/decorators/Http";
 import User from "./../models/User";
 import TransportMailer from "./../../mail";
 import generateToken from "./../utils/generateToken";
-import "dotenv/config";
 import { success, error } from "jsend";
+import "dotenv/config";
 
-export default class AuthController {
-    private router: Router = router;
+const http = new Http(Router());
 
-    @Post("/register")
+class AuthController {
+    public router: Router = http.router;
+
+    @http.Post("/register")
     public async register(req: Request, res: Response) {
         try {
             let user = await User.findOne({ ...req.body });
@@ -26,18 +28,23 @@ export default class AuthController {
             }
 
             const status = await mail.prepareMail("welcome", user.email, {
-                "%%user%%": user.name,
-                "%%address%%": process.env.BASE_URL,
+                user: user.name,
+                address: process.env.BASE_URL,
             });
 
-            return res
-                .send(success({ user, token: `Bearer ${generateToken({ id: user.id })}`, status }));
+            return res.send(
+                success({
+                    user,
+                    token: `Bearer ${generateToken({ id: user.id })}`,
+                    status,
+                }),
+            );
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
 
-    @Post("/login")
+    @http.Post("/login")
     public async auth(req: Request, res: Response) {
         try {
             const { email, password } = req.body;
@@ -48,14 +55,18 @@ export default class AuthController {
             if (!user) {
                 return res.status(400).send(error("User not exists!"));
             }
-            return res
-                .send(success({ user, token: `Bearer ${generateToken({ id: user.id })}` }));
+            return res.send(
+                success({
+                    user,
+                    token: `Bearer ${generateToken({ id: user.id })}`,
+                }),
+            );
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
 
-    @Post("/recovery")
+    @http.Post("/recovery")
     public async recovery(req: Request, res: Response) {
         try {
             const mail = new TransportMailer();
@@ -71,18 +82,16 @@ export default class AuthController {
                 "forgotpassword",
                 user.email,
                 {
-                    "%%user%%": user.name,
-                    "%%address%%": `${process.env.BASE_URL}?token=Bearer ${token}`,
+                    user: user.name,
+                    address: `${process.env.BASE_URL}?token=Bearer ${token}`,
                 },
             );
 
             return res.send(success(status));
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
-
-    get Router() {
-        return this.router;
-    }
 }
+
+export default new AuthController().router;

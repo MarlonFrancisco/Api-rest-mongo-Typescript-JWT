@@ -1,29 +1,35 @@
 import { Request, Response, Router } from "express";
-import Lessons from "../models/Lessons";
+import Content from "../models/Content";
 import { success, error } from "jsend";
+import Http from "../utils/decorators/Http";
+import Project from "../models/Project";
 
-import { Get, Put, Delete, router } from "../utils/decorators";
+const http = new Http(Router());
 
-export default class ContentController {
-    private router: Router = router;
+interface IRequest extends Request {
+    userId: string;
+}
 
-    @Get("/")
-    public async getAll(req: Request, res: Response) {
+class ContentController {
+    public router: Router = http.router;
+
+    @http.Get("/")
+    public async readAll(req: Request, res: Response) {
         try {
-            const users = await Lessons.find().populate("+User");
+            const users = await Content.find().populate(["content", "project"]);
 
             return res.send(success(users));
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
 
-    @Get("/:id")
-    public async getOne(req: Request, res: Response) {
+    @http.Get("/:id")
+    public async read(req: Request, res: Response) {
         try {
-            const user = await Lessons.findOne({ id_: req.params.id }).populate(
-                "+User",
-            );
+            const user = await Content.findOne({
+                id_: req.params.id,
+            }).populate(["assignedTo"]);
 
             if (!user) {
                 return res.status(400).send(error("User not found"));
@@ -31,18 +37,45 @@ export default class ContentController {
 
             return res.send(success(user));
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
 
-    @Put("/:id")
+    @http.Post("/")
+    public async create(req: IRequest, res: Response) {
+        try {
+            const project = await Project.findById(req.body.idProject);
+
+            if (!project) {
+                return res.status(400).send("Project not found");
+            }
+
+            const content = await Content.create({
+                ...req.body,
+                assignedTo: req.userId,
+            });
+
+            if (!content) {
+                return res.status(400).send("User not created");
+            }
+
+            project.contents.push(content._id);
+
+            await project.save();
+            return res.send(content);
+        } catch (err) {
+            return res.status(400).send(err);
+        }
+    }
+
+    @http.Put("/:id")
     public async update(req: Request, res: Response) {
         try {
-            if (!this.lessonExists(req.params.id)) {
+            if (!this.contentExists(req.params.id)) {
                 return res.status(400).send(error("User not found"));
             }
 
-            const user = await Lessons.findOneAndUpdate(
+            const user = await Content.findOneAndUpdate(
                 { _id: req.params.id },
                 {
                     $set: {
@@ -54,34 +87,32 @@ export default class ContentController {
 
             return res.send(success(user));
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
 
-    @Delete("/:id")
+    @http.Delete("/:id")
     public async delete(req: Request, res: Response) {
         try {
-            if (!this.lessonExists(req.params.id)) {
+            if (!this.contentExists(req.params.id)) {
                 return res.status(400).send(error("User not found"));
             }
 
-            await Lessons.findByIdAndDelete(req.params.id);
+            await Content.findByIdAndDelete(req.params.id);
 
             res.send(success(req.params.id));
         } catch (err) {
-            return res.send(error(err));
+            return res.status(400).send(error(err));
         }
     }
 
-    public async lessonExists(id: string) {
-        const user = await Lessons.findOne({ _id: id });
-        if (!user) {
+    public async contentExists(id: string) {
+        const content = await Content.findOne({ _id: id });
+        if (!content) {
             return false;
         }
         return true;
     }
-
-    get Router() {
-        return this.router;
-    }
 }
+
+export default new ContentController().router;
