@@ -1,5 +1,12 @@
 import mongoose from "../../database";
-import { Schema } from "mongoose";
+import { Schema, Document } from "mongoose";
+
+interface IContent extends Document {
+    project: any;
+    content: any[];
+    assignedTo: any;
+    publish: Date;
+}
 
 const contentSchema = new mongoose.Schema({
     project: {
@@ -7,9 +14,7 @@ const contentSchema = new mongoose.Schema({
         required: true,
         ref: "Project",
     },
-    content: [{
-        type: Schema.Types.ObjectId,
-    }],
+    content: {},
     assignedTo: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -21,6 +26,6 @@ const contentSchema = new mongoose.Schema({
     },
 });
 
-const Content = mongoose.model("Content", contentSchema);
+const Content = mongoose.model<IContent>("Content", contentSchema);
 
 export default Content;

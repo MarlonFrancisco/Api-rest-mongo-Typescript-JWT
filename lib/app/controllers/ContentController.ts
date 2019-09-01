@@ -16,7 +16,7 @@ class ContentController {
     @http.Get("/")
     public async readAll(req: Request, res: Response) {
         try {
-            const users = await Content.find().populate(["content", "project"]);
+            const users = await Content.find().populate(["assignedTo", "project"]);
 
             return res.send(users);
         } catch (err) {
@@ -52,6 +52,7 @@ class ContentController {
 
             const content = await Content.create({
                 ...req.body,
+                project: project._id,
                 assignedTo: req.userId,
             });
 
