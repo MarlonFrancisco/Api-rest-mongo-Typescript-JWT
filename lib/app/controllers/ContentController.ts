@@ -8,6 +8,7 @@ const http = new Http(Router());
 
 interface IRequest extends Request {
     userId: string;
+    body: any;
 }
 
 class ContentController {
