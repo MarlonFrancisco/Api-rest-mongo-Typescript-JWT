@@ -20,7 +20,10 @@ class UserController {
         try {
             const user = await User.findOne({ _id: req.userId }).populate({
                 path: "member",
-                populate: ["members", "contents"],
+                populate: ["members", {
+                    path: "contents",
+                    populate: "assignedTo",
+                }],
             });
 
             if (!user) {
