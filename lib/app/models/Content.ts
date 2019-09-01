@@ -15,6 +15,10 @@ const contentSchema = new mongoose.Schema({
         required: true,
         ref: "User",
     },
+    publish: {
+        type: Date,
+        required: true,
+    },
 });
 
 const Content = mongoose.model("Content", contentSchema);

@@ -17,20 +17,12 @@ class UserController {
     public router: Router = http.router;
 
     @http.Get("/")
-    public async getAll(req: IRequest, res: Response) {
-        try {
-            const users = await User.find();
-
-            return res.send(success(users));
-        } catch (err) {
-            return res.status(400).send(error(err));
-        }
-    }
-
-    @http.Get("/:id")
     public async getOne(req: IRequest, res: Response) {
         try {
-            const user = await User.findOne({ _id: req.params.id });
+            const user = await User.findOne({ _id: req.userId }).populate({
+                path: "member",
+                populate: "members",
+            });
 
             if (!user) {
                 return res.status(400).send({ error: "User not found" });
@@ -59,7 +51,7 @@ class UserController {
         }
     }
 
-    @http.Put("/:id")
+    @http.Put("/")
     public async update(req: IRequest, res: Response) {
         try {
             const user = await User.findOneAndUpdate(
@@ -78,7 +70,7 @@ class UserController {
         }
     }
 
-    @http.Delete("/:id")
+    @http.Delete("/")
     public async delete(req: IRequest, res: Response) {
         try {
             const user = await User.findOne(req.body);
