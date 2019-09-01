@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import Content from "../models/Content";
-import { success, error } from "jsend";
 import Http from "../utils/decorators/Http";
 import Project from "../models/Project";
 
@@ -19,9 +18,9 @@ class ContentController {
         try {
             const users = await Content.find().populate(["content", "project"]);
 
-            return res.send(success(users));
+            return res.send(users);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 
@@ -33,12 +32,12 @@ class ContentController {
             }).populate(["assignedTo"]);
 
             if (!user) {
-                return res.status(400).send(error("User not found"));
+                return res.status(400).send("User not found");
             }
 
-            return res.send(success(user));
+            return res.send(user);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 
@@ -73,7 +72,7 @@ class ContentController {
     public async update(req: Request, res: Response) {
         try {
             if (!this.contentExists(req.params.id)) {
-                return res.status(400).send(error("User not found"));
+                return res.status(400).send("User not found");
             }
 
             const user = await Content.findOneAndUpdate(
@@ -86,9 +85,9 @@ class ContentController {
                 { new: true },
             );
 
-            return res.send(success(user));
+            return res.send(user);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 
@@ -96,14 +95,14 @@ class ContentController {
     public async delete(req: Request, res: Response) {
         try {
             if (!this.contentExists(req.params.id)) {
-                return res.status(400).send(error("User not found"));
+                return res.status(400).send("User not found");
             }
 
             await Content.findByIdAndDelete(req.params.id);
 
-            res.send(success(req.params.id));
+            res.send(req.params.id);
         } catch (err) {
-            return res.status(400).send(error(err));
+            return res.status(400).send(err);
         }
     }
 
