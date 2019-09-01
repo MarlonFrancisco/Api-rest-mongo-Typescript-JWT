@@ -7,7 +7,10 @@ const http = new Http(Router());
 
 interface IRequest extends Request {
     userId: string;
-    params: any;
+    body: any;
+    params: {
+        id: string;
+    };
 }
 
 class UserController {
