@@ -31,7 +31,10 @@ class ProjectController {
         try {
             const { id } = req.params;
 
-            const project = await Project.findById(id);
+            const project = await Project.findById(id).populate([
+                "members",
+                "contents",
+            ]);
 
             if (!project) {
                 return res.status(400).send("Project not found");
