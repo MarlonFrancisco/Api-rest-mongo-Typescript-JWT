@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import "dotenv/config";
 
-type TypeMail = "forgotpassword" | "welcome";
+type TypeMail = "forgotpassword" | "welcome" | "guestproject";
 
 export default class TransportMailer {
     private from = process.env.FROM_EMAIL;
@@ -51,6 +51,8 @@ export default class TransportMailer {
             subject = "[CONSOLE] Recovery password";
         } else if (type === "welcome") {
             subject = "[CONSOLE] Welcome content creator";
+        } else if (type === "guestproject") {
+            subject = "[CONSOLE] Invite project";
         }
 
         return subject;

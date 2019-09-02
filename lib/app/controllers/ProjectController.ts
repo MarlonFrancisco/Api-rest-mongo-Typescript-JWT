@@ -2,6 +2,8 @@ import { Router, Request, Response } from "express";
 import Http from "../utils/decorators/Http";
 import Project from "../models/Project";
 import User from "../models/User";
+import TransportMailer from "../../mail";
+import "dotenv/config";
 
 const http = new Http(Router());
 
@@ -68,6 +70,7 @@ class ProjectController {
     @http.Put("/:idProject")
     public async addMember(req: Request, res: Response) {
         try {
+            const mail = new TransportMailer();
             const { idProject } = req.params;
             const { idUser } = req.body;
 
@@ -89,7 +92,13 @@ class ProjectController {
             await project.save();
             await user.save();
 
-            return res.send(project);
+            const status = await mail.prepareMail("guestproject", user.email, {
+                user: user.name,
+                projectName: project.name,
+                address: process.env.BASE_URL,
+            });
+
+            return res.send(status);
         } catch (err) {
             return res.status(400).send(err);
         }

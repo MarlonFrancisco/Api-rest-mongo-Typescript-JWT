@@ -15,12 +15,12 @@ gulp.task('clean', () => {
         .pipe(clean());
 });
 
-gulp.task('hbs', () => {
+gulp.task('html', () => {
     return gulp.src("./lib/**/*.html")
         .pipe(gulp.dest("dist"));
 });
 
-const tasks = gulp.series("clean", "compile", "hbs");
+const tasks = gulp.series("clean", "compile", "html");
 
 gulp.task('watch', () => {
     return gulp.watch("./lib/**/*.ts", { event: "change"}, tasks);

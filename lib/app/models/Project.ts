@@ -16,6 +16,7 @@ const projectSchema = new mongoose.Schema({
     },
     members: [{
         type: Schema.Types.ObjectId,
+        unique: true,
         ref: "User",
     }],
     contents: [{

@@ -15,6 +15,23 @@ interface IRequest extends Request {
 class UserController {
     public router: Router = http.router;
 
+    @http.Get("/all")
+    public async getAll(req: IRequest, res: Response) {
+        try {
+            const users = await User.find().populate({
+                path: "member",
+                populate: ["members", {
+                    path: "contents",
+                    populate: "assignedTo",
+                }],
+            });
+
+            return res.send(users);
+        } catch (err) {
+            return res.status(400).send(err);
+        }
+    }
+
     @http.Get("/")
     public async getOne(req: IRequest, res: Response) {
         try {
