@@ -52,6 +52,7 @@ class ContentController {
 
             const content = await Content.create({
                 content: req.body.content,
+                publish: req.body.publish,
                 project: project._id,
                 assignedTo: req.userId,
             });
