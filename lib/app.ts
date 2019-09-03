@@ -21,7 +21,7 @@ class App {
         this.express.use(json());
         this.express.use(cors());
         this.express.use("/auth", authRouter);
-        this.express.use("/user", [userRouter]);
+        this.express.use("/user", [Auth, userRouter]);
         this.express.use("/content", [Auth, contentRouter]);
         this.express.use("/project", projectRouter);
     }
