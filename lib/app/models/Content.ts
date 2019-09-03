@@ -14,7 +14,7 @@ const contentSchema = new mongoose.Schema({
         required: true,
         ref: "Project",
     },
-    content: Object,
+    content: Schema.Types.Mixed,
     assignedTo: {
         type: Schema.Types.ObjectId,
         required: true,
