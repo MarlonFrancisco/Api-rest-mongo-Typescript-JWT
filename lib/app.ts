@@ -7,6 +7,7 @@ import userRouter from "./app/controllers/UserController";
 import contentRouter from "./app/controllers/ContentController";
 import projectRouter from "./app/controllers/ProjectController";
 import Auth from "./app/middlewares/auth";
+import filterRouter from "./app/controllers/FilterController";
 
 class App {
     public express: express.Application;
@@ -21,9 +22,10 @@ class App {
         this.express.use(json());
         this.express.use(cors());
         this.express.use("/auth", authRouter);
+        this.express.use("/filter", filterRouter);
         this.express.use("/user", [Auth, userRouter]);
         this.express.use("/content", [Auth, contentRouter]);
-        this.express.use("/project", projectRouter);
+        this.express.use("/project", [Auth, projectRouter]);
     }
 }
 
