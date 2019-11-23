@@ -14,14 +14,18 @@ class FilterController {
                 project: req.headers.keyproject,
             });
 
-            const filtered = (Object.entries(req.body) as string[][]).map((fields: string[]) => {
-                return contents.filter(
-                    (content) =>
-                        content.content &&
-                        content.content[fields[0]] &&
-                        content.content[fields[0]] === fields[1],
-                );
-            });
+            const filtered = contents.map((content) => {
+                if (content.content) {
+                    const filters = Object.entries(req.body) as string[][];
+                    const tests = filters.some(
+                        (filter) =>
+                            content.content[filter[0]] &&
+                            content.content[filter[0]] === filter[1],
+                    );
+
+                    if (tests) { return content; }
+                }
+            }).filter((value) => value != null);
 
             res.send(filtered);
         } catch (err) {
