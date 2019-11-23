@@ -13,17 +13,19 @@ class FilterController {
             const contents = await Content.find({
                 project: req.headers.keyproject,
             });
-
             const filtered = contents.map((content) => {
                 if (content.content) {
                     const filters = Object.entries(req.body) as string[][];
-                    const tests = filters.some(
-                        (filter) =>
-                            content.content[filter[0]] &&
-                            content.content[filter[0]] === filter[1],
+                    const tests = filters.map(
+                        (filter) => {
+                            if (content.content[filter[0]] && content.content[filter[0]] === filter[1]) {
+                                return true;
+                            }
+                            return false;
+                        },
                     );
 
-                    if (tests) { return content; }
+                    if (!tests.includes(false)) { return content; }
                 }
             }).filter((value) => value != null);
 
